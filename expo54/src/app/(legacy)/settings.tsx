@@ -1,4 +1,5 @@
 import { Routes } from "@/src";
+import { useModel } from "@/src/hooks/use-model";
 import * as AsyncState from "@/src/legacy/async-state";
 import * as Feature from "@/src/legacy/feature";
 import i18n from "@/src/legacy/i18n";
@@ -30,6 +31,7 @@ import {
   Row,
   SubHeader,
 } from "@/src/legacy/ui";
+import { Action, Model } from "@/src/model";
 import { Picker } from "@react-native-picker/picker";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
@@ -150,6 +152,11 @@ async function registerForLocalNotificationsAsync() {
 
 export default function SettingScreen(): React.JSX.Element {
   const router = useRouter();
+  const [model, dispatch] = useModel();
+  const currentTheme = Model.match(model, {
+    ready: (m) => m.settings.theme,
+    loading: () => null,
+  });
   const [refresh, setRefresh] = React.useState(0);
   const historyButtonLabel =
     AsyncState.useAsyncState<HistoryButtonLabelSetting>(getHistoryButtonLabel, [
@@ -226,6 +233,31 @@ export default function SettingScreen(): React.JSX.Element {
             onPress={() => {
               router.navigate(Routes.thoughtList());
             }}
+          />
+        </Row>
+
+        <Row
+          style={{
+            marginBottom: 18,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <SubHeader>{i18n.t("settings.theme.header")}</SubHeader>
+          <RoundedSelectorButton
+            title={i18n.t("settings.theme.default")}
+            selected={currentTheme === null}
+            onPress={() => dispatch(Action.setTheme(null))}
+          />
+          <RoundedSelectorButton
+            title={i18n.t("settings.theme.light")}
+            selected={currentTheme === "light"}
+            onPress={() => dispatch(Action.setTheme("light"))}
+          />
+          <RoundedSelectorButton
+            title={i18n.t("settings.theme.dark")}
+            selected={currentTheme === "dark"}
+            onPress={() => dispatch(Action.setTheme("dark"))}
           />
         </Row>
 
